@@ -98,7 +98,7 @@ After creating the embeddings we need to flatten the JSON structures to be able 
 
 You'll end up with files in `gs://<your-project-id>-embeddings`
 
-## 6. Import embeddings into Vector Search
+## 2. Import embeddings into Vector Search
 
     cd ..
     
@@ -121,7 +121,7 @@ These steps are easier to do in Vector Search UI (one click):
     --index=INDEX_ID \
     --region=us-central1
 
-## 7. Create embeddings and load them into Postgres
+## 3. Create embeddings and load them into Postgres
 Our app will use Postgres to lookup the document names. A future enhancements will be to use BigQuery.
 
 Set up the database:
