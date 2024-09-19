@@ -164,7 +164,7 @@ Now we load the database with articles and their embeddings:
 
     gcloud batch jobs submit embed-and-load --location us-central1 --config embed-and-load-job.json
 
-## 9. Deploy Frontend
+## 4. Deploy Frontend
 Deploy the frontend to Cloud Run:
 
     cd .. && cd frontend
