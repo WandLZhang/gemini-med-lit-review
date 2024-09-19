@@ -1,0 +1,46 @@
+{
+  "taskGroups": [
+    {
+      "taskSpec": {
+        "runnables": [
+          {
+            "container": {
+              "imageUri": "us-central1-docker.pkg.dev/<your-project-id>/docker/jsonlifypubmed",
+              "commands": ["python", "jsonl-ify.py"]
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "gcs": { "remotePath": "<your-project-id>-datastore" },
+            "mountPath": "/mnt/disks/<your-project-id>-datastore"
+          },
+          {
+            "gcs": { "remotePath": "<your-project-id>-jsonl" },
+            "mountPath": "/mnt/disks/<your-project-id>-jsonl"
+          }
+        ],
+        "computeResource": {
+          "cpuMilli": 1000,
+          "memoryMib": 3750
+        },
+        "maxRetryCount": 3,
+        "maxRunDuration": "3600s"
+      },
+      "taskCount": 1219,
+      "parallelism": 64
+    }
+  ],
+  "allocationPolicy": {
+    "instances": [
+      {
+        "policy": {
+          "machineType": "e2-standard-4"
+        }
+      }
+    ]
+  },
+  "logsPolicy": {
+    "destination": "CLOUD_LOGGING"
+  }
+}

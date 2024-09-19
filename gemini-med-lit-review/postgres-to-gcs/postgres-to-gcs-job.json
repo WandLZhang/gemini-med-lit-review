@@ -1,0 +1,42 @@
+{
+  "taskGroups": [
+    {
+      "taskSpec": {
+        "runnables": [
+          {
+            "container": {
+              "imageUri": "us-central1-docker.pkg.dev/<your-project-id>/docker/postgres-to-gcs",
+              "commands": ["python", "postgres-to-gcs.py"]
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "gcs": { "remotePath": "rit-pubmed-ids-and-embeddings" },
+            "mountPath": "/mnt/disks/rit-pubmed-ids-and-embeddings"
+          }
+        ],
+        "computeResource": {
+          "cpuMilli": 1000,
+          "memoryMib": 1024
+        },
+        "maxRetryCount": 3,
+        "maxRunDuration": "3600s"
+      },
+      "taskCount": 2221,
+      "parallelism": 64
+    }
+  ],
+  "allocationPolicy": {
+    "instances": [
+      {
+        "policy": {
+          "machineType": "e2-standard-4"
+        }
+      }
+    ]
+  },
+  "logsPolicy": {
+    "destination": "CLOUD_LOGGING"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "taskGroups": [
+    {
+      "taskSpec": {
+        "runnables": [
+          {
+            "container": {
+              "imageUri": "us-central1-docker.pkg.dev/<your-project-id>/docker/create-embeddings-input",
+              "commands": ["python", "create-embeddings-input.py"]
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "gcs": { "remotePath": "<your-project-id>-embeddings-jsonl" },
+            "mountPath": "/mnt/disks/<your-project-id>-embeddings-jsonl"
+          },
+          {
+            "gcs": { "remotePath": "<your-project-id>-embeddings"},
+            "mountPath": "/mnt/disks/<your-project-id>-embeddings"
+          }
+        ],
+        "computeResource": {
+          "cpuMilli": 1000,
+          "memoryMib": 3750
+        },
+        "maxRetryCount": 3,
+        "maxRunDuration": "3600s"
+      },
+      "taskCount": 1,
+      "parallelism": 64
+    }
+  ],
+  "allocationPolicy": {
+    "instances": [
+      {
+        "policy": {
+          "machineType": "e2-standard-4"
+        }
+      }
+    ]
+  },
+  "logsPolicy": {
+    "destination": "CLOUD_LOGGING"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "taskGroups": [
+    {
+      "taskSpec": {
+        "runnables": [
+          {
+            "container": {
+              "imageUri": "us-central1-docker.pkg.dev/<your-project-id>/docker/embed-and-load",
+              "commands": ["python", "embed-and-load.py"]
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "gcs": { "remotePath": "<your-project-id>-embeddings-input" },
+            "mountPath": "/mnt/disks/<your-project-id>-embeddings-input"
+          }
+        ],
+        "computeResource": {
+          "cpuMilli": 1000,
+          "memoryMib": 3750
+        },
+        "maxRetryCount": 3,
+        "maxRunDuration": "36000s"
+      },
+      "taskCount": 1219,
+      "parallelism": 64
+    }
+  ],
+  "allocationPolicy": {
+    "instances": [
+      {
+        "policy": {
+          "machineType": "e2-standard-4"
+        }
+      }
+    ]
+  },
+  "logsPolicy": {
+    "destination": "CLOUD_LOGGING"
+  }
+}

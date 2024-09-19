@@ -1,0 +1,18 @@
+{
+    "displayName": "embedjob",
+    "model": "publishers/google/models/textembedding-gecko@003",
+    "inputConfig": {
+        "instancesFormat": "jsonl",
+        "gcsSource": {
+            "uris": [
+                "gs://rit-pubmed-embeddings-input/*"
+            ]
+        }
+    },
+    "outputConfig": {
+        "predictionsFormat": "jsonl",
+        "gcsDestination": {
+            "outputUriPrefix": "gs://rit-pubmed-embeddings-jsonl/"
+        }
+    }
+}
