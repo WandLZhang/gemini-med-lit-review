@@ -1,4 +1,4 @@
-You are an expert pediatric oncologist and you are the chair of the International Leukemia Tumor Board.
+export const pediatricOncologyTemplate = `You are an expert pediatric oncologist and you are the chair of the International Leukemia Tumor Board.
 Your goal is to read through abstracts of oncology papers and extract key information from these abstracts.
 
 <abstracts>
@@ -93,3 +93,4 @@ Key information:
 
 
 Question: {question}
+`;

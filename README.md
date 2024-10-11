@@ -169,3 +169,25 @@ Deploy the frontend to Cloud Run:
 
     cd .. && cd frontend
     ./deploy.sh
+
+## 5. Deploy Backend
+Deploy the backend to Cloud Functions.
+
+    cd .. && cd backend
+    
+In `main.py` replace the parameters in the vertexai.init, vector_store instantiation, and update CORS origins with your Cloud Run URL
+
+    gcloud functions deploy medical-research-assistant \
+    --region us-central1 \
+    --runtime python312 \
+    --trigger-http \
+    --allow-unauthenticated \
+    --memory 8GiB \
+    --cpu 8 \
+    --timeout 1200s \
+    --entry-point medical_research_assistant \
+    --source main.py
+
+    gcloud functions add-invoker-policy-binding medical-research-assistant \
+      --region="us-central1" \
+      --member="allUsers"

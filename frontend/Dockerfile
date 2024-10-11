@@ -1,18 +1,23 @@
-FROM python:3.12-slim
+# Use an official Node runtime as the parent image
+FROM node:14
 
+# Set the working directory in the container to /app
 WORKDIR /app
 
-# Don't need these on MacOS local build
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    git \
-    && rm -rf /var/lib/apt/lists/* 
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
 
-COPY requirements.txt .
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+# Install any needed packages specified in package.json
+RUN npm install
 
+# Copy the rest of the application code to the working directory
 COPY . .
 
-ENTRYPOINT ["streamlit","run","app.py","--server.port=8080","--server.address=0.0.0.0"]
+# Build the React app
+RUN npm run build
+
+# Make port 8080 available to the world outside this container
+EXPOSE 8080
+
+# Run the app when the container launches
+CMD ["npm", "start"]

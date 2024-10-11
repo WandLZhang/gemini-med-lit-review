@@ -1,11 +1,7 @@
 #!/bin/bash
 
-docker build -t us-central1-docker.pkg.dev/<your-project-id>/docker/frontend .
+npm run build
 
-docker push us-central1-docker.pkg.dev/<your-project-id>/docker/frontend
+gcloud builds submit --tag gcr.io/[PROJECT_ID]/medical-assistant
 
-# TODO add the CloudSQL config in here?
-gcloud run deploy frontend \
-    --image us-central1-docker.pkg.dev/<your-project-id>/docker/frontend \
-    --region us-central1 \
-    --allow-unauthenticated
+gcloud run deploy medical-assistant --image gcr.io/[PROJECT_ID]/medical-assistant --platform managed --allow-unauthenticated
