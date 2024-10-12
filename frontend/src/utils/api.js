@@ -1,6 +1,7 @@
 // src/utils/api.js
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://us-central1-<your-project-id>.cloudfunctions.net/medical-research-assistant';
+const GENERATE_CASE_URL = 'https://us-central1-<your-project-id>.cloudfunctions.net/generate-medical-case';
 
 /**
  * Fetches documents based on the given query
@@ -51,6 +52,31 @@ export const fetchAnalysis = async (query, template) => {
   } catch (error) {
     console.error('Error fetching analysis:', error);
     throw new Error(`Failed to fetch analysis: ${error.message}`);
+  }
+};
+
+/**
+ * Generates a sample medical case
+ * @returns {Promise<string>} - A promise that resolves to a generated sample medical case
+ */
+export const generateSampleCase = async () => {
+  try {
+    const response = await fetch(GENERATE_CASE_URL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.medical_case;
+  } catch (error) {
+    console.error('Error generating sample case:', error);
+    throw new Error(`Failed to generate sample case: ${error.message}`);
   }
 };
 
