@@ -1,0 +1,9 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', 
+           '--build-arg', 'REACT_APP_API_BASE_URL=${_REACT_APP_API_BASE_URL}',
+           '--build-arg', 'REACT_APP_GENERATE_CASE_URL=${_REACT_APP_GENERATE_CASE_URL}',
+           '-t', 'gcr.io/$PROJECT_ID/medical-assistant',
+           '.']
+images:
+  - 'gcr.io/$PROJECT_ID/medical-assistant'

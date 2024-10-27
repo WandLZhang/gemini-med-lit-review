@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { pediatricOncologyTemplate } from '../templates/pediatricOncology';
 import { gastrointestinalPathologyTemplate } from '../templates/gastrointestinalPathology';
+import { pediatricHematologyTemplate } from '../templates/pediatricHematology';
 
 const useTemplates = () => {
   const [templates, setTemplates] = useState([]);
@@ -12,7 +13,8 @@ const useTemplates = () => {
     console.log('useTemplates: Initializing templates');
     const defaultTemplates = [
       { id: '1', name: 'Pediatric Oncology', content: pediatricOncologyTemplate },
-      { id: '2', name: 'Gastrointestinal Pathology', content: gastrointestinalPathologyTemplate }
+      { id: '2', name: 'Gastrointestinal Pathology', content: gastrointestinalPathologyTemplate },
+      { id: '3', name: 'Pediatric Hematology', content: pediatricHematologyTemplate }
     ];
     
     console.log('useTemplates: Default templates:', defaultTemplates);
@@ -62,7 +64,7 @@ const useTemplates = () => {
     }
   };
 
-  console.log('useTemplates: Current state - templates:', templates, 'selectedTemplate:', selectedTemplate);
+//  console.log('useTemplates: Current state - templates:', templates, 'selectedTemplate:', selectedTemplate);
 
   return {
     templates,

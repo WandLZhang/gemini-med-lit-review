@@ -1,7 +1,7 @@
 // src/utils/api.js
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://us-central1-<your-project-id>.cloudfunctions.net/medical-research-assistant';
-const GENERATE_CASE_URL = 'https://us-central1-<your-project-id>.cloudfunctions.net/generate-medical-case';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const GENERATE_CASE_URL = process.env.REACT_APP_GENERATE_CASE_URL;
 
 /**
  * Fetches documents based on the given query
