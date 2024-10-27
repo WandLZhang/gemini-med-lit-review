@@ -164,13 +164,7 @@ Now we load the database with articles and their embeddings:
 
     gcloud batch jobs submit embed-and-load --location us-central1 --config embed-and-load-job.json
 
-## 4. Deploy Frontend
-Deploy the frontend to Cloud Run:
-
-    cd .. && cd frontend
-    ./deploy.sh
-
-## 5. Deploy Backend
+## 4. Deploy Backend
 Deploy the backends to Cloud Functions.
 
     cd .. && cd backend/generate-medical-case
@@ -212,3 +206,12 @@ In `main.py` replace the parameters in the vertexai.init, vector_store instantia
     gcloud functions add-invoker-policy-binding medical-research-assistant \
       --region="us-central1" \
       --member="allUsers"
+
+## 5. Deploy Frontend
+Deploy the frontend to Cloud Run:
+
+    cd .. && cd frontend
+
+In this folder, change `.env.example` to `.env` and replace the variable values. Then run the script:
+
+    ./deploy.sh
