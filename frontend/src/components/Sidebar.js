@@ -50,6 +50,8 @@ const Sidebar = ({ templates, selectedTemplate, setSelectedTemplate, addTemplate
       <div className="h-16 p-4 flex items-center justify-between border-b">
         <div className="text-sm font-semibold">Medical Research Assistant</div>
       </div>
+      
+      {/* Main content with overflow */}
       <div className="flex-grow overflow-y-auto p-4">
         <div className="mt-8">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Assistant Templates</h2>
@@ -83,6 +85,23 @@ const Sidebar = ({ templates, selectedTemplate, setSelectedTemplate, addTemplate
         </div>
       </div>
 
+      {/* Footer */}
+      <div className="border-gray-200 p-3 mt-auto">
+        <div className="p-4">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/maxima-logo.png" 
+              alt="Prinses Máxima Centrum logo" 
+              className="h-6 w-auto"
+            />
+            <span className="text-sm text-gray-600">
+              In collaboration with Prinses Máxima Centrum
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-3/4 max-w-2xl">
