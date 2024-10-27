@@ -110,6 +110,12 @@ const MedicalAssistantUI = () => {
                 <span className="ml-2">Analyzing documents...</span>
               </div>
             )}
+            {isGeneratingSample && (
+              <div className="flex justify-center items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                <span className="ml-2">Generating example case...</span>
+              </div>
+            )}
             {analysis && (
               <div className="bg-white rounded-lg shadow-md p-6 relative">
                 <h2 className="text-2xl font-bold mb-4"> </h2>
