@@ -4,17 +4,20 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const GENERATE_CASE_URL = process.env.REACT_APP_GENERATE_CASE_URL;
 
 /**
- * Fetches documents based on the given query
+ * Fetches documents based on the given query and template
  * @param {string} query - The search query
+ * @param {string} template - The template content
  * @returns {Promise<Array>} - A promise that resolves to an array of document objects
  */
-export const fetchDocuments = async (query) => {
+export const fetchDocuments = async (query, template) => {
   try {
     const response = await fetch(`${API_BASE_URL}?query=${encodeURIComponent(query)}&type=documents`, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ query, template }),
+      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -42,6 +45,7 @@ export const fetchAnalysis = async (query, template) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query, template }),
+      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -93,6 +97,7 @@ export const saveTemplate = async (template) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(template),
+      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -117,6 +122,7 @@ export const fetchTemplates = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -142,6 +148,7 @@ export const deleteTemplate = async (templateId) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

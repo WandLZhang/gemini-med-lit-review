@@ -164,6 +164,20 @@ Now we load the database with articles and their embeddings:
 
     gcloud batch jobs submit embed-and-load --location us-central1 --config embed-and-load-job.json
 
+## Write embeddings from Postgres to GCS
+
+    cd postgres-to-gcs
+
+    source .env
+
+    docker build -t us-central1-docker.pkg.dev/${PROJECT_ID}/docker/postgres-to-gcs .
+
+    docker push us-central1-docker.pkg.dev/${PROJECT_ID}/docker/postgres-to-gcs
+
+    gcloud batch jobs submit postgres-to-gcs \
+    --location us-central1 \
+    --config postgres-to-gcs-job.json
+
 ## 4. Deploy Backend
 Deploy the backends to Cloud Functions.
 

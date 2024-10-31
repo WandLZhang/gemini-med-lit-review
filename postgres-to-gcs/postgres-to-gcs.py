@@ -1,10 +1,12 @@
 import json
 import ast
 import os
-
 import pg8000
-
 from google.cloud.sql.connector import Connector, IPTypes
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def process():
     index = int(os.environ.get("BATCH_TASK_INDEX", "-1"))
@@ -13,21 +15,20 @@ def process():
         out_file = "tmp.json"
     else:
         file_index = str(index+1).zfill(4)
-        out_file = "/mnt/disks/rit-pubmed-ids-and-embeddings/pubmed" + file_index + ".json"
+        out_file = "/mnt/disks/rit-pubmed-ids-and-embeddings-from-postgres/pubmed" + file_index + ".json"
     print(out_file)
 
     connector = Connector()
     conn: pg8000.dbapi.Connection = connector.connect(
-        "<your-project-id>:us-central1:pmc-postgres",
+        os.environ.get("DB_CONNECTION_NAME"),  # "<project-id>:us-central1:pmc-postgres"
         "pg8000",
-        #host="localhost",
-        user="postgres",
-        password="z7f$ff[z<krB0sy;",
-        db="pubmed",
-        #ip_type=IPTypes.PUBLIC,
-        ip_type=IPTypes.PRIVATE,
+        user=os.environ.get("DB_USER"),
+        password=os.environ.get("DB_PASSWORD"),
+        db=os.environ.get("DB_NAME"),
+        ip_type=IPTypes.PUBLIC,
     )
 
+    # Rest of your code remains the same
     context = conn.execute_simple("SELECT version()")
     print(context.rows)
 

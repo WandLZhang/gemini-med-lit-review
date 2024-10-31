@@ -1,0 +1,7 @@
+.env
+*.env
+config.json
+credentials/*
+*.pem
+*.key
+postgres-to-gcs-job.json
