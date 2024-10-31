@@ -1,5 +1,5 @@
 {
-  "contentsDeltaUri": "gs://<your-project-id>-embeddings",
+  "contentsDeltaUri": "gs://<your-project-id>-embeddings-from-postgres",
   "config": {
     "dimensions": 768,
     "approximateNeighborsCount": 150,
