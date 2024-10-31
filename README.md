@@ -104,20 +104,20 @@ You'll end up with files in `gs://<your-project-id>-embeddings`
     
     gcloud ai indexes create \
         --metadata-file=create-index.json \
-        --display-name=pubmed-index \
+        --display-name=pubmed-index-postgres \
         --region=us-central1 \
         --project=<your-project-id>
 
 These steps are easier to do in Vector Search UI (one click):
 
     gcloud ai index-endpoints create \
-    --display-name=pubmed-endpoint \
+    --display-name=pubmed-endpoint-postgres \
     --public-endpoint-enabled \
     --region=us-central1
 
     gcloud ai index-endpoints deploy-index <ID> \
     --deployed-index-id=DEPLOYED_INDEX_ID \
-    --display-name=pubmed-endpoint \
+    --display-name=pubmed-endpoint-postgres \
     --index=INDEX_ID \
     --region=us-central1
 
