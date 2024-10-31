@@ -98,30 +98,7 @@ After creating the embeddings we need to flatten the JSON structures to be able 
 
 You'll end up with files in `gs://<your-project-id>-embeddings`
 
-## 2. Import embeddings into Vector Search
-
-    cd ..
-    
-    gcloud ai indexes create \
-        --metadata-file=create-index.json \
-        --display-name=pubmed-index-postgres \
-        --region=us-central1 \
-        --project=<your-project-id>
-
-These steps are easier to do in Vector Search UI (one click):
-
-    gcloud ai index-endpoints create \
-    --display-name=pubmed-endpoint-postgres \
-    --public-endpoint-enabled \
-    --region=us-central1
-
-    gcloud ai index-endpoints deploy-index <ID> \
-    --deployed-index-id=DEPLOYED_INDEX_ID \
-    --display-name=pubmed-endpoint-postgres \
-    --index=INDEX_ID \
-    --region=us-central1
-
-## 3. Create embeddings and load them into Postgres
+## 2. Create embeddings and load them into Postgres
 Our app will use Postgres to lookup the document names. A future enhancements will be to use BigQuery.
 
 Set up the database:
@@ -164,7 +141,7 @@ Now we load the database with articles and their embeddings:
 
     gcloud batch jobs submit embed-and-load --location us-central1 --config embed-and-load-job.json
 
-## Write embeddings from Postgres to GCS
+## 3. Write the embeddings from Postgres to GCS
 
     cd postgres-to-gcs
 
@@ -178,7 +155,30 @@ Now we load the database with articles and their embeddings:
     --location us-central1 \
     --config postgres-to-gcs-job.json
 
-## 4. Deploy Backend
+## 4. Import the embeddings into Vector Search
+
+    cd ..
+    
+    gcloud ai indexes create \
+        --metadata-file=create-index.json \
+        --display-name=pubmed-index-postgres \
+        --region=us-central1 \
+        --project=<your-project-id>
+
+These steps are easier to do in Vector Search UI (one click):
+
+    gcloud ai index-endpoints create \
+    --display-name=pubmed-endpoint-postgres \
+    --public-endpoint-enabled \
+    --region=us-central1
+
+    gcloud ai index-endpoints deploy-index <ID> \
+    --deployed-index-id=DEPLOYED_INDEX_ID \
+    --display-name=pubmed-endpoint-postgres \
+    --index=INDEX_ID \
+    --region=us-central1
+
+## 5. Deploy Backend
 Deploy the backends to Cloud Functions.
 
     cd .. && cd backend/generate-medical-case
@@ -221,7 +221,7 @@ In `main.py` replace the parameters in the vertexai.init, vector_store instantia
       --region="us-central1" \
       --member="allUsers"
 
-## 5. Deploy Frontend
+## 6. Deploy Frontend
 Deploy the frontend to Cloud Run:
 
     cd .. && cd frontend
