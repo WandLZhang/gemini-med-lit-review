@@ -38,7 +38,7 @@ const MedicalAssistantUI = () => {
       setIsLoadingDocs(true);
       try {
         const docs = await fetchDocuments(userMessage);
-        setIsLoadingDocs(false); // Clear loading state before setting documents
+        setIsLoadingDocs(false);
         setDocuments(docs);
         setChatHistory(prev => [...prev, { 
           id: Date.now(), 
@@ -119,6 +119,14 @@ const MedicalAssistantUI = () => {
                   <ChatMessage key={msg.id} message={msg} />
               ))}
             </div>
+
+            {/* Sample case generation loading state */}
+            {isGeneratingSample && (
+              <div className="flex justify-center items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                <span className="ml-2">Generating example case...</span>
+              </div>
+            )}
 
             {/* Documents section */}
             {isLoadingDocs && (
