@@ -104,7 +104,7 @@ const MedicalAssistantUI = () => {
       />
       <main className="flex-1 flex flex-col">
         <header className="h-16 p-4 flex justify-between items-center bg-white shadow-sm">
-          <h1 className="text-xl font-semibold text-gray-800">Medical Research Assistant</h1>
+          <h1 className="text-xl font-semibold text-gray-800"></h1>
           <button className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors">
             Login
           </button>
