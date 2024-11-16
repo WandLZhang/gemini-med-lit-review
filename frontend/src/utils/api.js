@@ -21,13 +21,13 @@ export const fetchDocuments = async (query, template) => {
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      throw new Error(JSON.stringify(errorData) || `HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     return data.documents;
   } catch (error) {
     console.error('Error fetching documents:', error);
-    throw new Error(`Failed to fetch documents: ${error.message}`);
+    throw error; // Throw the original error object
   }
 };
 

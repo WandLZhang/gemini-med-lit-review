@@ -1,2 +1,5 @@
 postgres-to-gcs/postgres-to-gcs-job.json
 create-index.json
+.DS_Store
+frontend/.firebase/hosting.cHVibGlj.cache
+frontend/.firebase/hosting.YnVpbGQ.cache

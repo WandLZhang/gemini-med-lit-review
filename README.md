@@ -5,18 +5,25 @@ Credit to Máxima team and jmbrinkman@google.com, templatized by Google Public S
 ## 1. Copy the PubMed embeddings
 We are using the annual baseline of MEDLINE citations as of 2024-09-13, but in the future we could also add the daily update files (see https://pubmed.ncbi.nlm.nih.gov/download).
 
-Make your buckets for storing the embeddings for Vector Search, as well as another bucket for separate indexing in Postgres (used for article citation retrieval):
+Make your buckets for storing the embeddings:
 
     # Set the project ID variable
     export PROJECT_ID="your-project-id" // Replace with your actual project ID
 
+    # Bucket for embeddings of JSONified PubMed abstracts
     gsutil mb -c regional -l us-central1 -p "$PROJECT_ID" gs://"${PROJECT_ID}-embeddings"
 
+    # Bucket for embeddings from Postgres of PubMed abstracts
+    gsutil mb -c regional -l us-central1 -p "$PROJECT_ID" gs://"${PROJECT_ID}-ids-and-embeddings-from-postgres-us-central1"
+
+    # Bucket for loading PubMed abstracts into Postgres
     gsutil mb -p "$PROJECT_ID" gs://"${PROJECT_ID}-embeddings-input" 
 
-Use these commands to directly copy the embeddings and the Postgres input, then skip to the next step:
+Use these commands to directly copy the embeddings, then skip to the next step:
 
     gsutil -m cp -r gs://rit-pubmed-embeddings/* gs://"${PROJECT_ID}-embeddings"
+
+    gsutil -m cp -r gs://rit-pubmed-ids-and-embeddings-from-postgres-us-central1/* gs://"${PROJECT_ID}-ids-and-embeddings-from-postgres-us-central1"
 
     gsutil -m cp -r gs://rit-pubmed-embeddings-input/* gs://"${PROJECT_ID}-embeddings-input"
 
@@ -143,6 +150,8 @@ Now we load the database with articles and their embeddings:
 
 ## 3. Write the embeddings from Postgres to GCS
 
+Skip this step if you already copied the gs://rit-pubmed-ids-and-embeddings-from-postgres-us-central1 bucket from step1
+
     cd postgres-to-gcs
 
     source .env
@@ -222,10 +231,90 @@ In `main.py` replace the parameters in the vertexai.init, vector_store instantia
       --member="allUsers"
 
 ## 6. Deploy Frontend
-Deploy the frontend to Cloud Run:
+Change directory:
 
     cd .. && cd frontend
 
-In this folder, change `.env.example` to `.env` and replace the variable values. Then run the script:
+Confirm npm, Node.js, and Firebase CLI are installed.
 
-    ./deploy.sh
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your existing ${PROJECT_ID}
+3. Enable required services:
+   - Authentication
+     - Go to Authentication > Sign-in method
+     - Enable Google Authentication
+   - Firestore Database
+     - Go to Firestore Database
+     - Create database
+     - Select production (or test mode)
+     - Choose a location
+
+4. In the Firebase Console, get your web app credentials:
+   - Click the gear icon next to "Project Overview"
+   - Click "Project settings"
+   - Under "Your apps", click the web icon (</>)
+   - Register your app
+   - Note the firebaseConfig values for the next step
+
+5. Rename the `.env.example` to `.env` and fill these out:
+```env
+REACT_APP_FIREBASE_API_KEY=your_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_auth_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
+```
+
+6. Install dependencies
+```bash
+npm install
+```
+
+7. Initialize Firebase in your project
+```bash
+firebase login
+firebase init
+```
+
+8. During Firebase initialization:
+   - Select these features:
+     - Hosting
+   - Choose `build` as your public directory
+   - Configure as single-page app
+   - Don't overwrite existing files
+
+9. Update your firestore.rules, easiest in Firebase console:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /chats/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+10. In Firebase Console, go to Authentication
+11. Set up Google sign-in method
+12. Add authorized domains for OAuth redirects
+
+13. Local Development
+```bash
+npm start
+```
+
+14. Build your project:
+```bash
+npm run build
+```
+
+15. Deploy to Firebase:
+```bash
+firebase deploy
+```
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.

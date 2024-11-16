@@ -1,6 +1,21 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 const app = express();
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'https://lh3.googleusercontent.com',
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'build')));
