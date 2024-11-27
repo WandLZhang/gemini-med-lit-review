@@ -25,78 +25,78 @@ const useChat = (user, selectedTemplate) => {
     }]);
   }, []);
 
-const handleChatSelect = useCallback(async (chat) => {
-  if (chat) {
-    setActiveChat(chat);
-    
-    const messages = [];
-    
-    // Add welcome message if not already present
-    if (!chat.messages?.find(msg => msg.content === WELCOME_MESSAGE)) {
-      messages.push({ 
-        id: `welcome-${chat.id}`, 
-        text: WELCOME_MESSAGE, 
-        isUser: false,
-        timestamp: chat.createdAt
-      });
-    }
-    
-    // Load all messages in chronological order
-    chat.messages?.forEach(msg => {
-      switch (msg.type) {
-        case 'message':
-          messages.push({
-            id: msg.messageId,
-            text: msg.content,
-            isUser: msg.role === 'user',
-            timestamp: msg.timestamp
-          });
-          break;
-          
-        case 'documents':
-          messages.push({
-            id: msg.messageId,
-            text: "I've retrieved some relevant documents. Analyzing them now...",
-            isUser: false,
-            documents: JSON.parse(msg.content),
-            timestamp: msg.timestamp
-          });
-          break;
-          
-        case 'analysis':
-          messages.push({
-            id: msg.messageId,
-            text: "I've completed the analysis. You can view the results below.",
-            isUser: false,
-            analysis: msg.content,
-            timestamp: msg.timestamp
-          });
-          break;
-          
-        case 'error':
-          messages.push({
-            id: msg.messageId,
-            text: msg.content,
-            isUser: false,
-            error: msg.error,
-            timestamp: msg.timestamp
-          });
-          break;
+  const handleChatSelect = useCallback(async (chat) => {
+    if (chat) {
+      setActiveChat(chat);
+      
+      const messages = [];
+      
+      // Add welcome message if not already present
+      if (!chat.messages?.find(msg => msg.content === WELCOME_MESSAGE)) {
+        messages.push({ 
+          id: `welcome-${chat.id}`, 
+          text: WELCOME_MESSAGE, 
+          isUser: false,
+          timestamp: chat.createdAt
+        });
       }
-    });
+      
+      // Load all messages in chronological order
+      chat.messages?.forEach(msg => {
+        switch (msg.type) {
+          case 'message':
+            messages.push({
+              id: msg.messageId,
+              text: msg.content,
+              isUser: msg.role === 'user',
+              timestamp: msg.timestamp
+            });
+            break;
+            
+          case 'documents':
+            messages.push({
+              id: msg.messageId,
+              text: "I've retrieved some relevant documents. Analyzing them now...",
+              isUser: false,
+              documents: JSON.parse(msg.content),
+              timestamp: msg.timestamp
+            });
+            break;
+            
+          case 'analysis':
+            messages.push({
+              id: msg.messageId,
+              text: "I've completed the analysis. You can view the results below.",
+              isUser: false,
+              analysis: msg.content,
+              timestamp: msg.timestamp
+            });
+            break;
+            
+          case 'error':
+            messages.push({
+              id: msg.messageId,
+              text: msg.content,
+              isUser: false,
+              error: msg.error,
+              timestamp: msg.timestamp
+            });
+            break;
+        }
+      });
 
-    // Sort messages by timestamp if needed
-    messages.sort((a, b) => a.timestamp - b.timestamp);
-    
-    setChatHistory(messages);
-  } else {
-    await initializeNewChat();
-  }
-}, [initializeNewChat]);
+      // Sort messages by timestamp if needed
+      messages.sort((a, b) => a.timestamp - b.timestamp);
+      
+      setChatHistory(messages);
+    } else {
+      await initializeNewChat();
+    }
+  }, [initializeNewChat]);
 
   const handleSendMessage = useCallback(async (e) => {
     e.preventDefault();
-    if (message.trim() && !isLoadingDocs && !isLoadingAnalysis && user) {
+    if (message.trim() && !isLoadingDocs && !isLoadingAnalysis) {
       const userMessage = message;
       setMessage('');
   
@@ -111,30 +111,35 @@ const handleChatSelect = useCallback(async (chat) => {
         let currentChatId = activeChat?.id;
         let messagesForFirestore = [];
           
-        if (!currentChatId) {
-          // Only create new chat when user sends first message
-          const initialMessages = [{
-            content: WELCOME_MESSAGE,
-            role: 'assistant',
+        if (user) {
+          if (!currentChatId) {
+            // Only create new chat when user sends first message
+            const initialMessages = [{
+              content: WELCOME_MESSAGE,
+              role: 'assistant',
+              timestamp: new Date(),
+              type: 'message',
+              messageId: `welcome-${Date.now()}`
+            }];
+            currentChatId = await createNewChat(user.uid, initialMessages);
+            setActiveChat({ id: currentChatId, messages: initialMessages });
+          }
+
+          messagesForFirestore = [...(activeChat?.messages || [])];
+          messagesForFirestore.push({
+            content: userMessage,
+            role: 'user',
             timestamp: new Date(),
             type: 'message',
-            messageId: `welcome-${Date.now()}`
-          }];
-          currentChatId = await createNewChat(user.uid, initialMessages);
-          setActiveChat({ id: currentChatId, messages: initialMessages });
+            messageId: newUserMessage.id
+          });
         }
-
-        messagesForFirestore = [...(activeChat?.messages || [])];
-        messagesForFirestore.push({
-          content: userMessage,
-          role: 'user',
-          timestamp: new Date(),
-          type: 'message',
-          messageId: newUserMessage.id
-        });
         
         setChatHistory(prev => [...prev, newUserMessage]);
-        await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+        
+        if (user) {
+          await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+        }
 
         setIsLoadingDocs(true);
         try {
@@ -149,16 +154,21 @@ const handleChatSelect = useCallback(async (chat) => {
             timestamp: new Date()
           };
 
-          messagesForFirestore.push({
-            content: JSON.stringify(docs),
-            role: 'assistant',
-            timestamp: new Date(),
-            type: 'documents',
-            messageId: docsMessage.id
-          });
+          if (user) {
+            messagesForFirestore.push({
+              content: JSON.stringify(docs),
+              role: 'assistant',
+              timestamp: new Date(),
+              type: 'documents',
+              messageId: docsMessage.id
+            });
+          }
 
           setChatHistory(prev => [...prev, docsMessage]);
-          await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+          
+          if (user) {
+            await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+          }
 
           setIsLoadingAnalysis(true);
           try {
@@ -172,16 +182,21 @@ const handleChatSelect = useCallback(async (chat) => {
               timestamp: new Date()
             };
             
-            messagesForFirestore.push({
-              content: analysisResult,
-              role: 'assistant',
-              timestamp: new Date(),
-              type: 'analysis',
-              messageId: analysisMessage.id
-            });
+            if (user) {
+              messagesForFirestore.push({
+                content: analysisResult,
+                role: 'assistant',
+                timestamp: new Date(),
+                type: 'analysis',
+                messageId: analysisMessage.id
+              });
+            }
             
             setChatHistory(prev => [...prev, analysisMessage]);
-            await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+            
+            if (user) {
+              await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+            }
             
           } catch (error) {
             console.error('Error fetching analysis:', error);
@@ -192,16 +207,21 @@ const handleChatSelect = useCallback(async (chat) => {
               timestamp: new Date()
             };
             
-            messagesForFirestore.push({
-              content: errorMessage.text,
-              role: 'assistant',
-              timestamp: new Date(),
-              type: 'error',
-              messageId: errorMessage.id
-            });
+            if (user) {
+              messagesForFirestore.push({
+                content: errorMessage.text,
+                role: 'assistant',
+                timestamp: new Date(),
+                type: 'error',
+                messageId: errorMessage.id
+              });
+            }
             
             setChatHistory(prev => [...prev, errorMessage]);
-            await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+            
+            if (user) {
+              await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+            }
           }
           setIsLoadingAnalysis(false);
         } catch (error) {
@@ -214,17 +234,22 @@ const handleChatSelect = useCallback(async (chat) => {
             error: error.message // Add the error message here
           };
           
-          messagesForFirestore.push({
-            content: errorMessage.text,
-            role: 'assistant',
-            timestamp: new Date(),
-            type: 'error',
-            messageId: errorMessage.id
-          });
+          if (user) {
+            messagesForFirestore.push({
+              content: errorMessage.text,
+              role: 'assistant',
+              timestamp: new Date(),
+              type: 'error',
+              messageId: errorMessage.id
+            });
+          }
           
           setIsLoadingDocs(false);
           setChatHistory(prev => [...prev, errorMessage]);
-          await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+          
+          if (user) {
+            await addMessageToChat(user.uid, currentChatId, messagesForFirestore);
+          }
         }
       } catch (error) {
         console.error('Error handling message:', error);
@@ -239,9 +264,9 @@ const handleChatSelect = useCallback(async (chat) => {
     activeChat,
     message,
     setMessage,
-    handleChatSelect,
+    handleChatSelect: user ? handleChatSelect : null,
     handleSendMessage,
-    initializeNewChat  // Expose this so Sidebar can use it
+    initializeNewChat: user ? initializeNewChat : null
   };
 };
 

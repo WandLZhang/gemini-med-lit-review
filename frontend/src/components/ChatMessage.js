@@ -1,10 +1,12 @@
+// src/components/ChatMessage.js
+
 import React, { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 const ChatMessage = ({ message }) => {
   const [isErrorExpanded, setIsErrorExpanded] = useState(false);
 
-  const isError = message.text.includes("I'm sorry, there was an error");
+  const isError = message.text && message.text.includes("I'm sorry, there was an error");
 
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -24,7 +26,7 @@ const ChatMessage = ({ message }) => {
           </div>
         )}
         <div className="text-sm">
-          {message.text}
+          {message.text || ''}
           {isError && !isErrorExpanded && (
             <button 
               onClick={() => setIsErrorExpanded(true)}

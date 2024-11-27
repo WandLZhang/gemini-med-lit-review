@@ -22,7 +22,7 @@ from flask import jsonify, request
 from flask_cors import CORS
 
 # Initialize Vertex AI with your project ID
-vertexai.init(project="<your-project-id>")
+vertexai.init(project="gemini-med-lit-review")
 
 class VectorSearchVectorStorePostgres(_BaseVertexAIVectorStore):
     """VectorSearch with Postgres document storage."""
@@ -118,13 +118,13 @@ def configure_vector_store():
     embeddings = VertexAIEmbeddings("textembedding-gecko@003")
 
     vector_store = VectorSearchVectorStorePostgres.from_components(
-        project_id="<your-project-id>",
+        project_id="gemini-med-lit-review",
         region="us-central1",
-        index_id="<vector search index id>",
-        endpoint_id="projects/<project #>/locations/us-central1/indexEndpoints/<index endpoint id>",
-        pg_instance_connection_string="<your-project-id>:us-central1:pubmed-postgres",
+        index_id="1771018563230892032",
+        endpoint_id="projects/934163632848/locations/us-central1/indexEndpoints/1996902232041193472",
+        pg_instance_connection_string="gemini-med-lit-review:us-central1:pubmed-postgres",
         pg_user="postgres",
-        pg_password="(your password)",
+        pg_password="pubmedpostgres",
         pg_db="pubmed",
         pg_collection_name="articles",
         embedding=embeddings,
@@ -156,7 +156,7 @@ def configure_qa_chain(retriever, llm, template_content):
 
 def process_query(query, template_content):
     vector_store = configure_vector_store()
-    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 10})
+    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 15})
     llm = configure_llm()
     qa_chain = configure_qa_chain(retriever, llm, template_content)
 
@@ -168,11 +168,28 @@ def process_query(query, template_content):
     
     return response.content
 
-def retrieve_documents(query):
+def retrieve_documents(query, template_content):
     vector_store = configure_vector_store()
-    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 10})
-    docs = list(retriever.get_relevant_documents(query))
+    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 15})
+    llm = configure_llm()
+    qa_chain = configure_qa_chain(retriever, llm, template_content)
+
+    # Use the setup_and_retrieval part of the qa_chain to get documents
+    setup_and_retrieval = qa_chain.steps[0]
+    result = setup_and_retrieval.invoke(query)
+    
+    docs = result['abstracts']
     return [{"title": doc.metadata.get('title', 'No title'), "content": doc.page_content} for doc in docs]
+
+def is_medically_related(query):
+    llm = configure_llm()
+    prompt = ChatPromptTemplate.from_template(
+        "Is the following query related to medical or health? Lean towards being permissive as the topic could always include sensitve things around body health, but filter out vulgar queries or related to building weapons."
+        "Answer with only 'Yes' or 'No'.\n\nQuery: {query}"
+    )
+    chain = prompt | llm
+    response = chain.invoke({"query": query})
+    return response.content.strip().lower() == 'yes'
 
 @functions_framework.http
 def medical_research_assistant(request):
@@ -181,7 +198,8 @@ def medical_research_assistant(request):
     cors = CORS(
         origins=[
             "http://localhost:3000",
-            "<your cloud run url>"
+            "https://medical-assistant-934163632848.us-central1.run.app",
+            "https://gemini-med-lit-review.web.app","http://localhost:5000"
         ],
         methods=["GET", "POST", "OPTIONS"],
         allow_headers=["Content-Type"],
@@ -217,13 +235,19 @@ def medical_research_assistant(request):
     else:
         return (jsonify({'error': 'No query provided'}), 400, headers)
 
+    # Check if the query is medically-related
+    # if not is_medically_related(query):
+    #    return (jsonify({'error': 'Query is not related to medical or health topics'}), 400, headers)
+
+    # Get the template content
+    template_content = request_json.get('template', '') if request_json else ''
+
     # Check if it's a request for documents or analysis
     if request_args.get('type') == 'documents':
-        docs = retrieve_documents(query)
+        docs = retrieve_documents(query, template_content)
         return (jsonify({'documents': docs}), 200, headers)
     elif request_args.get('type') == 'analysis':
         if request.method == 'POST' and request_json:
-            template_content = request_json.get('template', '')
             analysis = process_query(query, template_content)
             return (jsonify({'analysis': analysis}), 200, headers)
         else:
@@ -234,7 +258,8 @@ def medical_research_assistant(request):
 # The following code will not be executed in Cloud Functions environment
 if __name__ == "__main__":
     query = "asian americans and cancer"
-    docs = retrieve_documents(query)
+    template_content = "Default template content"
+    docs = retrieve_documents(query, template_content)
     print("Retrieved documents:", docs)
-    analysis = process_query(query, "Default template content")
+    analysis = process_query(query, template_content)
     print("Analysis:", analysis)

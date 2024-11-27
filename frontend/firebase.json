@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "gemini-med-lit-review",
     "public": "build",
     "ignore": [
       "firebase.json",
